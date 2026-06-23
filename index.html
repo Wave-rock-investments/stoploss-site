@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StopLoss Calculator — Pro MT5 Risk Manager</title>
+<style>
+  :root {
+    --green: #14cc42;
+    --green-dim: #0fa332;
+    --red: #ff4242;
+    --blue: #2979ff;
+    --bg: #0a0a0c;
+    --bg2: #111114;
+    --bg3: #18181c;
+    --card: #1c1c22;
+    --border: #2a2a32;
+    --text: #f0f0f5;
+    --muted: #8888a0;
+    --gold: #f5c842;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; line-height: 1.6; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 40px;
+    background: rgba(10,10,12,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--green); }
+  .nav-cta {
+    background: var(--green); color: #000; font-weight: 700;
+    padding: 10px 24px; border-radius: 8px; text-decoration: none;
+    font-size: 0.9rem; transition: all 0.2s;
+  }
+  .nav-cta:hover { background: #1de84e; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 120px 24px 80px;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20,204,66,0.08) 0%, transparent 70%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(20,204,66,0.1); border: 1px solid rgba(20,204,66,0.3);
+    color: var(--green); padding: 6px 16px; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px;
+    text-transform: uppercase; margin-bottom: 28px;
+  }
+  .badge::before { content: '●'; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -2px; margin-bottom: 24px;
+    max-width: 800px;
+  }
+  h1 em { font-style: normal; color: var(--green); }
+  h1 .gold { color: var(--gold); }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--muted); max-width: 580px; margin-bottom: 48px;
+  }
+
+  .hero-cta-group { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 64px; }
+  .btn-primary {
+    background: var(--green); color: #000; font-weight: 800;
+    padding: 18px 40px; border-radius: 12px; text-decoration: none;
+    font-size: 1.05rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 0 40px rgba(20,204,66,0.3);
+  }
+  .btn-primary:hover { background: #1de84e; transform: translateY(-2px); box-shadow: 0 0 60px rgba(20,204,66,0.5); }
+  .btn-secondary {
+    background: transparent; color: var(--text); font-weight: 600;
+    padding: 18px 32px; border-radius: 12px; text-decoration: none;
+    font-size: 1rem; border: 1px solid var(--border); transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--muted); background: rgba(255,255,255,0.04); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex; justify-content: center; gap: 64px; flex-wrap: wrap;
+    padding: 0 24px;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 2rem; font-weight: 800; color: var(--green); line-height: 1; }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── SECTION ── */
+  section { padding: 100px 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    text-align: center; font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--green); font-weight: 700; margin-bottom: 16px;
+  }
+  h2 {
+    text-align: center; font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800; letter-spacing: -1px; margin-bottom: 16px;
+  }
+  .section-sub { text-align: center; color: var(--muted); max-width: 520px; margin: 0 auto 64px; }
+
+  /* ── PROBLEM ── */
+  .problem-section { background: var(--bg2); }
+  .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .problem-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px; position: relative; overflow: hidden;
+  }
+  .problem-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--red);
+  }
+  .problem-icon { font-size: 2rem; margin-bottom: 16px; }
+  .problem-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--red); }
+  .problem-card p { font-size: 0.9rem; color: var(--muted); }
+
+  /* ── FEATURES ── */
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+  .feature-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 32px; transition: all 0.3s; position: relative; overflow: hidden;
+  }
+  .feature-card:hover { border-color: rgba(20,204,66,0.4); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .feature-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(20,204,66,0.1); display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 20px;
+  }
+  .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+  .feature-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { background: var(--bg2); }
+  .steps { display: flex; flex-direction: column; gap: 0; max-width: 700px; margin: 0 auto; }
+  .step {
+    display: flex; gap: 24px; padding: 32px 0;
+    border-bottom: 1px solid var(--border); position: relative;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+    background: var(--green); color: #000; font-weight: 800; font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-content h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+  .step-content p { color: var(--muted); font-size: 0.9rem; }
+
+  /* ── INSTRUMENTS ── */
+  .instruments { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 40px; }
+  .instrument-tag {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 8px 18px; border-radius: 100px; font-size: 0.85rem;
+    font-weight: 600; color: var(--muted); transition: all 0.2s;
+  }
+  .instrument-tag:hover, .instrument-tag.active {
+    border-color: var(--green); color: var(--green); background: rgba(20,204,66,0.08);
+  }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .testi-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px;
+  }
+  .testi-stars { color: var(--gold); font-size: 1rem; margin-bottom: 16px; }
+  .testi-text { font-size: 0.95rem; color: var(--text); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem; color: #000;
+  }
+  .testi-name { font-weight: 700; font-size: 0.9rem; }
+  .testi-handle { font-size: 0.8rem; color: var(--muted); }
+
+  /* ── PRICING ── */
+  .pricing-section { background: var(--bg2); }
+  .pricing-card {
+    max-width: 520px; margin: 0 auto;
+    background: var(--card); border: 2px solid var(--green); border-radius: 24px;
+    padding: 48px; text-align: center; position: relative;
+    box-shadow: 0 0 80px rgba(20,204,66,0.15);
+  }
+  .pricing-badge {
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: #000; font-weight: 800;
+    padding: 6px 20px; border-radius: 100px; font-size: 0.8rem;
+    text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
+  }
+  .price-label { color: var(--muted); font-size: 0.9rem; margin-bottom: 8px; }
+  .price-amount { font-size: 4rem; font-weight: 900; line-height: 1; letter-spacing: -3px; }
+  .price-amount sup { font-size: 1.5rem; font-weight: 700; vertical-align: top; margin-top: 8px; }
+  .price-note { color: var(--muted); font-size: 0.85rem; margin: 8px 0 32px; }
+  .price-features { list-style: none; text-align: left; margin-bottom: 40px; display: flex; flex-direction: column; gap: 14px; }
+  .price-features li { display: flex; align-items: center; gap: 12px; font-size: 0.95rem; }
+  .price-features li::before { content: '✓'; color: var(--green); font-weight: 800; font-size: 1rem; flex-shrink: 0; }
+  .price-cta {
+    display: block; background: var(--green); color: #000; font-weight: 800;
+    padding: 18px; border-radius: 12px; text-decoration: none;
+    font-size: 1.1rem; transition: all 0.2s;
+    box-shadow: 0 0 40px rgba(20,204,66,0.3);
+  }
+  .price-cta:hover { background: #1de84e; transform: translateY(-2px); }
+  .price-guarantee { margin-top: 20px; font-size: 0.8rem; color: var(--muted); }
+
+  /* ── FAQ ── */
+  .faq-list { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .faq-item {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    padding: 20px 24px; font-weight: 700; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.95rem; user-select: none;
+  }
+  .faq-q:hover { color: var(--green); }
+  .faq-q .arrow { transition: transform 0.3s; color: var(--muted); }
+  .faq-item.open .faq-q .arrow { transform: rotate(180deg); }
+  .faq-a { padding: 0 24px; max-height: 0; overflow: hidden; transition: all 0.3s; color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+  .faq-item.open .faq-a { padding: 0 24px 20px; max-height: 300px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg2); border-top: 1px solid var(--border);
+    padding: 48px 24px; text-align: center;
+  }
+  .footer-logo { font-size: 1.2rem; font-weight: 800; margin-bottom: 12px; }
+  .footer-logo span { color: var(--green); }
+  footer p { color: var(--muted); font-size: 0.85rem; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 0; }
+
+  /* ── TICKER ── */
+  .ticker-wrap { overflow: hidden; background: var(--bg3); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 0; }
+  .ticker { display: flex; gap: 48px; animation: ticker 30s linear infinite; white-space: nowrap; }
+  .ticker-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+  .ticker-item .up { color: var(--green); }
+  .ticker-item .dn { color: var(--red); }
+  @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:600px) {
+    nav { padding: 14px 20px; }
+    section { padding: 70px 20px; }
+    .stats-bar { gap: 32px; }
+    .pricing-card { padding: 40px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">StopLoss<span>Pro</span></div>
+  <a href="#pricing" class="nav-cta">Get Lifetime Access — $250</a>
+</nav>
+
+<!-- TICKER -->
+<div style="margin-top:64px;" class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">XAUUSD <span class="up">▲ 2,342.80</span></span>
+    <span class="ticker-item">EURUSD <span class="dn">▼ 1.0821</span></span>
+    <span class="ticker-item">GBPUSD <span class="up">▲ 1.2654</span></span>
+    <span class="ticker-item">US30 <span class="up">▲ 39,421</span></span>
+    <span class="ticker-item">NAS100 <span class="up">▲ 17,832</span></span>
+    <span class="ticker-item">BTCUSD <span class="dn">▼ 68,240</span></span>
+    <span class="ticker-item">USDJPY <span class="up">▲ 157.42</span></span>
+    <span class="ticker-item">USDCAD <span class="dn">▼ 1.3612</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item">XAUUSD <span class="up">▲ 2,342.80</span></span>
+    <span class="ticker-item">EURUSD <span class="dn">▼ 1.0821</span></span>
+    <span class="ticker-item">GBPUSD <span class="up">▲ 1.2654</span></span>
+    <span class="ticker-item">US30 <span class="up">▲ 39,421</span></span>
+    <span class="ticker-item">NAS100 <span class="up">▲ 17,832</span></span>
+    <span class="ticker-item">BTCUSD <span class="dn">▼ 68,240</span></span>
+    <span class="ticker-item">USDJPY <span class="up">▲ 157.42</span></span>
+    <span class="ticker-item">USDCAD <span class="dn">▼ 1.3612</span></span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">MT5 Risk Manager for Professional Traders</div>
+  <h1>Stop <em>Guessing</em> Your Position Size.<br/>Start Trading Like a <span class="gold">Pro.</span></h1>
+  <p class="hero-sub">The only MT5 tool that calculates your exact stop-loss, position size, and risk-reward — then places the trade directly. One tap. Zero math errors.</p>
+  <div class="hero-cta-group">
+    <a href="#pricing" class="btn-primary">⚡ Get Lifetime Access — $250</a>
+    <a href="#features" class="btn-secondary">See All Features ↓</a>
+  </div>
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num">2 sec</div>
+      <div class="stat-label">From analysis to order</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">40+</div>
+      <div class="stat-label">Instruments supported</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">MT5 native integration</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">$0</div>
+      <div class="stat-label">Monthly fees, ever</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROBLEM -->
+<section class="problem-section">
+  <div class="container">
+    <div class="section-label">The Problem</div>
+    <h2>Every second you waste on math<br/>is money left on the table</h2>
+    <p class="section-sub">Manual position sizing is slow, error-prone, and gets blown by emotion under pressure.</p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">🧮</div>
+        <h3>Manual Calculations Kill Speed</h3>
+        <p>Calculating lot size, SL pips, and R:R manually during fast markets causes missed entries and fat-finger errors.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">💸</div>
+        <h3>Risking Too Much Per Trade</h3>
+        <p>Without precise lot sizing tied to your account balance, a single bad trade can blow 5-10% instead of your planned 1-2%.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">⏱️</div>
+        <h3>Slow Order Execution</h3>
+        <p>Switching between MT5, a calculator, and your phone while markets move costs you entry price and mental clarity.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-label">What You Get</div>
+    <h2>Everything built for<br/>serious MT5 traders</h2>
+    <p class="section-sub">Not a generic calculator. Purpose-built for live MT5 trading with direct order placement.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📐</div>
+        <h3>Instant Position Size Calculator</h3>
+        <p>Enter your account size, risk %, entry, and ATR. Get your exact lot size in milliseconds — no mental math, no Excel.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>ATR-Based SL/TP Levels</h3>
+        <p>Fetches live ATR from your MT5 terminal and computes precise stop-loss and take-profit levels for any instrument.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>One-Click MT5 Order Placement</h3>
+        <p>Confirm your setup and hit Buy or Sell. The order fires directly to MetaTrader 5 — Market, Limit, or Stop orders.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔢</div>
+        <h3>Auto Lot Calculator</h3>
+        <p>Risk exactly 1%, 1.5%, or any % of your account per trade. Auto-computes lot size from your balance and SL distance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Risk:Reward Dashboard</h3>
+        <p>See your R:R ratio, risk amount in $, potential profit, and win-rate breakeven displayed before every trade.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📜</div>
+        <h3>Full Trade History</h3>
+        <p>Every setup is logged automatically. Review past trades, track your sizing decisions, and build discipline over time.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌙</div>
+        <h3>Dark / Light Theme</h3>
+        <p>Optimized Dhan Carbon Black dark theme for night trading sessions. Switches instantly, remembers your preference.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Lifetime License, No Subscription</h3>
+        <p>Pay once, use forever. No monthly fees, no cloud dependency. Your machine, your license, your control.</p>
+      </div>
+    </div>
+
+    <!-- Instruments -->
+    <div style="text-align:center; margin-top:80px;">
+      <div class="section-label">Supported Instruments</div>
+      <h2 style="margin-bottom:12px;">Works on every major market</h2>
+      <p class="section-sub">Any symbol your MT5 broker offers — auto-resolved on connect.</p>
+      <div class="instruments">
+        <span class="instrument-tag active">XAUUSD (Gold)</span>
+        <span class="instrument-tag">EURUSD</span>
+        <span class="instrument-tag">GBPUSD</span>
+        <span class="instrument-tag">USDJPY</span>
+        <span class="instrument-tag">NAS100</span>
+        <span class="instrument-tag">US30 (DJ30)</span>
+        <span class="instrument-tag">BTCUSD</span>
+        <span class="instrument-tag">USDCAD</span>
+        <span class="instrument-tag">GBPJPY</span>
+        <span class="instrument-tag">AUDUSD</span>
+        <span class="instrument-tag">USOIL (WTI)</span>
+        <span class="instrument-tag">SP500</span>
+        <span class="instrument-tag">SILVER</span>
+        <span class="instrument-tag">EURJPY</span>
+        <span class="instrument-tag">+ any MT5 symbol</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2>Live in under 5 minutes</h2>
+    <p class="section-sub">Simple setup. Instant results. No coding required.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Download & Activate</h3>
+          <p>Download the Windows app, run <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;">StopLossCalculator.exe</code>, and enter your license key to unlock. Done in 60 seconds.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Connect to MT5</h3>
+          <p>Paste your MT5 bridge URL (takes 2 minutes to set up), tap Connect, and the app syncs live prices, ATR, and your account balance instantly.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Calculate & Place</h3>
+          <p>Select your instrument, enter your setup, and hit Fetch to auto-fill ATR. Review your SL/TP/lots, then tap Buy or Sell — order goes to MT5 in under 2 seconds.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Review & Track</h3>
+          <p>The trade setup is auto-saved to history. Review past trades, track sizing decisions, and build discipline over time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="container">
+    <div class="section-label">Traders Love It</div>
+    <h2>Real results from real traders</h2>
+    <p class="section-sub">What professional MT5 traders are saying.</p>
+    <div class="testimonials-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"I was sizing positions manually in Excel for 2 years. This tool does it in 2 seconds and places the order. Genuinely changed how fast I can trade Gold."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">AK</div>
+          <div>
+            <div class="testi-name">Arjun K.</div>
+            <div class="testi-handle">XAUUSD Trader · Mumbai</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"The auto-lot feature is worth the price alone. I risk exactly 1% of my balance every trade now. No more oversizing because of lazy math."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">MS</div>
+          <div>
+            <div class="testi-name">Mohammed S.</div>
+            <div class="testi-handle">Forex Trader · Dubai</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"The R:R display alone changed how I think about entries. I see my exact risk in dollars before I place a single trade. No more guessing."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">RV</div>
+          <div>
+            <div class="testi-name">Ravi V.</div>
+            <div class="testi-handle">Forex Trader · Hyderabad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2>One price. Forever.</h2>
+    <p class="section-sub">No subscriptions. No hidden fees. Pay once and use it for the rest of your trading career.</p>
+    <div class="pricing-card">
+      <div class="pricing-badge">🔥 Most Popular — Lifetime Deal</div>
+      <p class="price-label">One-time payment</p>
+      <div class="price-amount"><sup>$</sup>250</div>
+      <p class="price-note">Lifetime license · 1 machine · No recurring fees</p>
+      <ul class="price-features">
+        <li>Full StopLoss Calculator (Windows .exe)</li>
+        <li>Live MT5 integration — place orders directly</li>
+        <li>ATR-based SL/TP auto-calculation</li>
+        <li>Auto lot sizing (% of account risk)</li>
+        <li>Full trade history log</li>
+        <li>Dark &amp; Light theme</li>
+        <li>All future updates included</li>
+        <li>Setup support via email</li>
+      </ul>
+      <a href="checkout.html" class="price-cta">⚡ Buy Now — Pay with USDT</a>
+      <p class="price-guarantee">🔐 USDT TRC20 · 0% fees · Auto-activated · Lifetime license</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:18px;font-size:0.78rem;color:var(--muted);">
+        <span>💵 USDT TRC20</span>
+        <span>•</span>
+        <span>⚡ Instant activation</span>
+        <span>•</span>
+        <span>🔒 On-chain verified</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section>
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2>Common questions</h2>
+    <p class="section-sub">Everything you need to know before buying.</p>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">Does this work with my broker? <span class="arrow">▼</span></div>
+        <div class="faq-a">Yes. It works with any broker that runs MetaTrader 5 — IC Markets, Pepperstone, XM, Exness, Fusion Markets, and hundreds more. It auto-resolves your broker's symbol naming on connect.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is this a subscription or one-time? <span class="arrow">▼</span></div>
+        <div class="faq-a">100% one-time payment. Pay $250 once and use it forever. No monthly fees, no annual renewals, no surprises.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What operating system does it run on? <span class="arrow">▼</span></div>
+        <div class="faq-a">The desktop app runs on Windows 10/11 (64-bit). It is a standalone .exe — no Python or other software installation required.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does MT5 integration work? <span class="arrow">▼</span></div>
+        <div class="faq-a">The app connects to your MT5 terminal via a lightweight local bridge. Setup takes under 5 minutes — a one-page guide is included with your purchase. You'll be placing orders within 5 minutes of setup.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does it place orders automatically? <span class="arrow">▼</span></div>
+        <div class="faq-a">No — StopLoss Calculator is a manual tool. You review the trade setup (lots, SL, TP, R:R) and then tap Buy/Sell to confirm. You are always in control of every order.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I get access after payment? <span class="arrow">▼</span></div>
+        <div class="faq-a">Instantly and automatically. After paying with USDT, enter your TX hash on the checkout page — your Machine ID is approved on-chain in seconds. Open the app, click "Check Again", and you're in.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FINAL CTA -->
+<section style="text-align:center; padding: 100px 24px; background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(20,204,66,0.07) 0%, transparent 70%);">
+  <div class="section-label">Ready to Trade Smarter?</div>
+  <h2 style="margin-bottom:16px;">Join traders who never<br/>guess their position size</h2>
+  <p style="color:var(--muted); margin-bottom:48px; max-width:440px; margin-left:auto; margin-right:auto;">One payment. Lifetime access. Setup in 5 minutes. Start protecting your capital with precision.</p>
+  <a href="#pricing" class="btn-primary" style="font-size:1.15rem; padding: 20px 52px;">⚡ Get StopLoss Pro — $250</a>
+  <p style="color:var(--muted); margin-top:20px; font-size:0.85rem;">Lifetime license · Instant download · Works on Windows 10/11</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">StopLoss<span>Pro</span></div>
+  <p style="margin-top:8px;">Professional MT5 Risk Management Tool</p>
+  <p style="margin-top:16px;">© 2026 StopLoss Calculator. All rights reserved.</p>
+</footer>
+
+<script>
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.parentElement;
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // Instrument tag highlight
+  document.querySelectorAll('.instrument-tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      document.querySelectorAll('.instrument-tag').forEach(t => t.classList.remove('active'));
+      tag.classList.add('active');
+    });
+  });
+
+  // Smooth nav highlight on scroll
+  const pricingSection = document.getElementById('pricing');
+  const navCta = document.querySelector('.nav-cta');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) navCta.style.background = '#1de84e';
+      else navCta.style.background = '';
+    });
+  }, { threshold: 0.3 });
+  observer.observe(pricingSection);
+</script>
+</body>
+</html>

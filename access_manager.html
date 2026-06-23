@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StopLoss — Access Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+
+/* ── Modal ── */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:999}
+.modal-box{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:36px;width:420px;max-width:92vw}
+.modal-box h2{color:#58a6ff;font-size:1.3rem;margin-bottom:6px}
+.modal-box p{color:#8b949e;font-size:.88rem;margin-bottom:20px;line-height:1.5}
+.modal-box input{width:100%;padding:11px 14px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:.95rem;outline:none;font-family:monospace}
+.modal-box input:focus{border-color:#58a6ff}
+.modal-box button{width:100%;margin-top:12px;padding:11px;background:#238636;border:none;border-radius:6px;color:#fff;font-size:1rem;cursor:pointer;font-weight:600}
+.modal-box button:hover{background:#2ea043}
+#modal-err{color:#f85149;margin-top:10px;font-size:.83rem;display:none}
+
+/* ── Header ── */
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.header h1{font-size:1.1rem;color:#f0f6fc}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#last-ref{font-size:.78rem;color:#8b949e}
+.btn-sm{padding:6px 14px;border-radius:6px;font-size:.83rem;cursor:pointer;border:1px solid #30363d;background:#21262d;color:#c9d1d9}
+.btn-sm:hover{background:#30363d}
+.btn-lock{border-color:#f85149;color:#f85149;background:transparent}
+.btn-lock:hover{background:rgba(248,81,73,.1)}
+
+/* ── Stats ── */
+.stats{display:flex;gap:14px;padding:20px 24px;overflow-x:auto}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 20px;min-width:100px;text-align:center;flex:1}
+.stat-val{font-size:1.9rem;font-weight:700}
+.stat-label{font-size:.75rem;color:#8b949e;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.s-total .stat-val{color:#58a6ff}
+.s-approved .stat-val{color:#3fb950}
+.s-pending .stat-val{color:#d29922}
+.s-revoked .stat-val{color:#f85149}
+
+/* ── Content ── */
+.content{padding:0 24px 80px}
+.section{margin-bottom:24px}
+.sec-title{font-size:.8rem;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+
+/* ── Cards ── */
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px;flex-wrap:wrap}
+.card-info{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.mid{font-family:monospace;font-size:.95rem;color:#f0f6fc;overflow:hidden;text-overflow:ellipsis}
+.note{font-size:.78rem;color:#8b949e;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+.badge{font-size:.73rem;padding:3px 9px;border-radius:12px;font-weight:700;white-space:nowrap}
+.b-approved{background:rgba(63,185,80,.15);color:#3fb950;border:1px solid #3fb950}
+.b-pending{background:rgba(210,153,34,.15);color:#d29922;border:1px solid #d29922}
+.b-revoked{background:rgba(248,81,73,.15);color:#f85149;border:1px solid #f85149}
+
+.actions{display:flex;gap:8px}
+.btn-approve{background:#238636;border:none;border-radius:6px;color:#fff;padding:7px 14px;cursor:pointer;font-size:.82rem;white-space:nowrap}
+.btn-approve:hover{background:#2ea043}
+.btn-deny{background:#6e1a1a;border:none;border-radius:6px;color:#f85149;padding:7px 14px;cursor:pointer;font-size:.82rem;white-space:nowrap;border:1px solid #da3633}
+.btn-deny:hover{background:#8b2020}
+.btn-revoke{background:transparent;border:1px solid #f85149;border-radius:6px;color:#f85149;padding:7px 14px;cursor:pointer;font-size:.82rem;white-space:nowrap}
+.btn-revoke:hover{background:rgba(248,81,73,.1)}
+
+/* ── Approve form ── */
+.approve-form{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.approve-form input{flex:1;min-width:180px;padding:9px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-family:monospace;font-size:.9rem;outline:none}
+.approve-form input:focus{border-color:#3fb950}
+.approve-form button{background:#238636;border:none;border-radius:6px;color:#fff;padding:9px 18px;cursor:pointer;font-weight:600;white-space:nowrap}
+.approve-form button:hover{background:#2ea043}
+
+/* ── Status / empty ── */
+#status-bar{position:fixed;bottom:16px;right:16px;background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:8px 16px;font-size:.8rem;color:#8b949e;max-width:90vw;z-index:20}
+#status-bar.loading{color:#d29922}
+#status-bar.ok{color:#3fb950}
+#status-bar.err{color:#f85149}
+.empty{text-align:center;padding:20px;color:#8b949e;font-size:.88rem}
+</style>
+</head>
+<body>
+
+<!-- ── Token Modal ── -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <h2>🔐 Admin Login</h2>
+    <p>Enter your GitHub Personal Access Token (needs <strong>gist</strong> scope).<br>
+       Token stays in memory only — never saved to disk or cookies.</p>
+    <input type="password" id="tok" placeholder="ghp_..." autocomplete="off"/>
+    <button onclick="unlock()">Unlock Panel</button>
+    <div id="modal-err"></div>
+  </div>
+</div>
+
+<!-- ── Main UI ── -->
+<div id="ui" style="display:none">
+  <div class="header">
+    <h1>⚡ StopLoss — Access Manager</h1>
+    <div class="header-right">
+      <span id="last-ref"></span>
+      <button class="btn-sm" onclick="loadAll()">↻ Refresh</button>
+      <button class="btn-sm btn-lock" onclick="lock()">🔒 Lock</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat s-total"><div class="stat-val" id="st">–</div><div class="stat-label">Total</div></div>
+    <div class="stat s-approved"><div class="stat-val" id="sa">–</div><div class="stat-label">Approved</div></div>
+    <div class="stat s-pending"><div class="stat-val" id="sp">–</div><div class="stat-label">Pending</div></div>
+    <div class="stat s-revoked"><div class="stat-val" id="sr">–</div><div class="stat-label">Revoked</div></div>
+  </div>
+
+  <div class="content">
+
+    <!-- Manual approve -->
+    <div class="section">
+      <div class="sec-title">Manual Approve</div>
+      <div class="approve-form">
+        <input id="manual-id" type="text" placeholder="Paste Machine ID  (e.g. 60133939F5DE160A)" maxlength="16"/>
+        <button onclick="manualApprove()">✓ Approve</button>
+      </div>
+    </div>
+
+    <!-- Pending -->
+    <div class="section">
+      <div class="sec-title">Pending Requests (<span id="cnt-p">0</span>)</div>
+      <div id="list-p"><div class="empty">No pending requests</div></div>
+    </div>
+
+    <!-- Approved -->
+    <div class="section">
+      <div class="sec-title">Approved Users (<span id="cnt-a">0</span>)</div>
+      <div id="list-a"><div class="empty">No approved users</div></div>
+    </div>
+
+    <!-- Revoked -->
+    <div class="section">
+      <div class="sec-title">Revoked (<span id="cnt-r">0</span>)</div>
+      <div id="list-r"><div class="empty">None</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="status-bar">Ready</div>
+
+<script>
+const GIST_ID = '5be92423bef4404c5e866cb30a0fba42';
+const API     = `https://api.github.com/gists/${GIST_ID}`;
+
+let token     = null;
+let approved  = [];   // machine IDs currently approved
+let revoked   = [];   // machine IDs revoked
+let pending   = [];   // [{mid, tx, raw}] from pending_txns.txt
+let timer     = null;
+
+// ── Auth ───────────────────────────────────────────────
+async function unlock() {
+  const t = document.getElementById('tok').value.trim();
+  if (!t) return;
+  status('Verifying…', 'loading');
+  try {
+    const r2 = await fetch(API, {headers:{Authorization:`token ${t}`}});
+    if (!r2.ok) {
+      showErr(`Token rejected (HTTP ${r2.status}). Check token has gist scope.`);
+      status('Auth failed', 'err'); return;
+    }
+    token = t;
+    document.getElementById('modal-overlay').style.display = 'none';
+    document.getElementById('ui').style.display = 'block';
+    await loadAll();
+    timer = setInterval(loadAll, 15000);
+  } catch(e) {
+    showErr('Network error — check your internet connection');
+    status('Error', 'err');
+  }
+}
+
+document.getElementById('tok').addEventListener('keydown', e => { if(e.key==='Enter') unlock(); });
+
+function lock() {
+  clearInterval(timer); token = null;
+  approved = []; revoked = []; pending = [];
+  document.getElementById('tok').value = '';
+  hideErr();
+  document.getElementById('modal-overlay').style.display = 'flex';
+  document.getElementById('ui').style.display = 'none';
+  status('Locked', '');
+}
+
+function showErr(m) {
+  const e = document.getElementById('modal-err');
+  e.textContent = m; e.style.display = 'block';
+}
+function hideErr() {
+  document.getElementById('modal-err').style.display = 'none';
+}
+
+// ── Gist I/O ──────────────────────────────────────────
+async function ghGet() {
+  const r = await fetch(API, {headers:{Authorization:`token ${token}`}});
+  if (!r.ok) throw new Error(`Read failed ${r.status}`);
+  return r.json();
+}
+
+async function ghPatch(files) {
+  const r = await fetch(API, {
+    method:'PATCH',
+    headers:{Authorization:`token ${token}`,'Content-Type':'application/json'},
+    body: JSON.stringify({files})
+  });
+  if (!r.ok) throw new Error(`Write failed ${r.status}`);
+  return r.json();
+}
+
+// ── Load & render ─────────────────────────────────────
+async function loadAll() {
+  status('Loading…', 'loading');
+  try {
+    const g = await ghGet();
+    const raw = f => g.files[f]?.content || '';
+
+    approved = raw('approved_ids.txt').split('\n').map(s=>s.trim()).filter(Boolean);
+    revoked  = raw('revoked_ids.txt').split('\n').map(s=>s.trim()).filter(Boolean);
+
+    const pendRaw = raw('pending_txns.txt');
+    pending = pendRaw.split('\n').map(s=>s.trim()).filter(Boolean).map(l => {
+      try {
+        // New JSON format: {"tx":"...","mid":"...","ip":"...","city":"...",...}
+        const d = JSON.parse(l);
+        const mid = (d.mid||'').toUpperCase();
+        if (!mid) return null;
+        if (approved.includes(mid) || revoked.includes(mid)) return null;
+        return { raw:l, mid, tx:d.tx||null, p1:!!d.p1,
+                 user:d.user||'', host:d.host||'', mac:d.mac||'',
+                 model:d.model||'', cpu:d.cpu||'', ram:d.ram||'',
+                 screen:d.screen||'', arch:d.arch||'', os:d.os||'',
+                 ip:d.ip||'', city:d.city||'', region:d.region||'',
+                 country:d.country||'', org:d.org||'',
+                 loc:d.loc||'', loc_src:d.loc_src||'IP', ts:d.ts||0 };
+      } catch(e) {
+        // Legacy format: txHash:machineId
+        if (!l.includes(':')) return null;
+        const idx = l.indexOf(':');
+        const tx  = l.slice(0, idx);
+        const mid = l.slice(idx + 1).toUpperCase();
+        if (!mid || !/^[A-F0-9]{8,16}$/i.test(mid)) return null;
+        if (approved.includes(mid) || revoked.includes(mid)) return null;
+        return { raw:l, mid, tx,
+                 user:'', host:'', mac:'', model:'', cpu:'', ram:'',
+                 screen:'', arch:'', os:'', ip:'', city:'', region:'',
+                 country:'', org:'', loc:'', loc_src:'IP', ts:0 };
+      }
+    }).filter(Boolean);
+
+    render();
+    document.getElementById('last-ref').textContent =
+      'Updated ' + new Date().toLocaleTimeString();
+    status(`Loaded — ${approved.length} approved`, 'ok');
+  } catch(e) { status('Load error: '+e.message, 'err'); }
+}
+
+function render() {
+  const activeApproved = approved.filter(id => !revoked.includes(id));
+  set('st', approved.length + pending.length);
+  set('sa', activeApproved.length);
+  set('sp', pending.length);
+  set('sr', revoked.length);
+  set('cnt-p', pending.length);
+  set('cnt-a', activeApproved.length);
+  set('cnt-r', revoked.length);
+
+  // Pending
+  document.getElementById('list-p').innerHTML = pending.length === 0
+    ? '<div class="empty">No pending requests</div>'
+    : pending.map(p => {
+      const locStr = [p.city, p.region, p.country].filter(Boolean).join(', ');
+      const ts = p.ts ? new Date(p.ts * 1000).toLocaleString() : '';
+      const mapsUrl = p.loc ? `https://maps.google.com/?q=${p.loc}` : '';
+      return `
+      <div class="card" style="flex-direction:column;align-items:flex-start">
+        <div style="display:flex;width:100%;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="mid">${p.mid}</div>
+            ${p.p1 ? `<div class="note" style="color:#58a6ff">📦 P1 — Direct customer (no TX hash)</div>`
+                   : (p.tx && p.tx !== 'P1-DIRECT' ? `<div class="note">TX: ${p.tx.slice(0,20)}…</div>` : '')}
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+            ${p.p1 ? `<span class="badge" style="background:rgba(88,166,255,.15);color:#58a6ff;border:1px solid #58a6ff">P1 DIRECT</span>`
+                   : `<span class="badge b-pending">P2 CRYPTO</span>`}
+            <button class="btn-approve" onclick="approveUser('${p.mid}')">✓ Approve</button>
+            <button class="btn-deny" onclick="denyPending('${p.mid}')">✗ Deny</button>
+          </div>
+        </div>
+        ${(p.user||p.host||p.mac||p.model||p.ip) ? `
+        <div style="margin-top:8px;font-size:.75rem;font-family:monospace;line-height:1.9;width:100%;border-top:1px solid #21262d;padding-top:8px;color:#c9d1d9">
+          ${p.user    ? `<div><span style="color:#8b949e">User:   </span>${p.user}</div>` : ''}
+          ${p.host    ? `<div><span style="color:#8b949e">Host:   </span>${p.host}</div>` : ''}
+          ${p.mac     ? `<div><span style="color:#8b949e">MAC:    </span>${p.mac}</div>` : ''}
+          ${p.model   ? `<div><span style="color:#8b949e">Model:  </span>${p.model}</div>` : ''}
+          ${p.cpu     ? `<div><span style="color:#8b949e">CPU:    </span>${p.cpu}</div>` : ''}
+          ${p.ram     ? `<div><span style="color:#8b949e">RAM:    </span>${p.ram}</div>` : ''}
+          ${p.screen  ? `<div><span style="color:#8b949e">Screen: </span>${p.screen}</div>` : ''}
+          ${p.arch    ? `<div><span style="color:#8b949e">Arch:   </span>${p.arch}</div>` : ''}
+          ${p.os      ? `<div><span style="color:#8b949e">OS:     </span>${p.os}</div>` : ''}
+          ${p.ip      ? `<div><span style="color:#8b949e">IP:     </span>${p.ip}${locStr ? ' — '+locStr : ''}</div>` : ''}
+          ${p.org     ? `<div><span style="color:#8b949e">Org:    </span>${p.org}</div>` : ''}
+          ${mapsUrl   ? `<div><span style="color:#8b949e">Coords: </span><a href="${mapsUrl}" target="_blank" style="color:#58a6ff">${p.loc} (${p.loc_src||'IP'})</a></div>` : ''}
+          ${ts        ? `<div style="color:#6e7681;margin-top:2px">🕐 ${ts}</div>` : ''}
+        </div>` : ''}
+      </div>`;
+    }).join('');
+
+  // Approved
+  document.getElementById('list-a').innerHTML = activeApproved.length === 0
+    ? '<div class="empty">No approved users</div>'
+    : activeApproved.map(id => `
+      <div class="card">
+        <div class="card-info">
+          <div class="mid">${id}</div>
+          <span class="badge b-approved">APPROVED</span>
+        </div>
+        <div class="actions">
+          <button class="btn-revoke" onclick="revokeUser('${id}')">✗ Revoke</button>
+        </div>
+      </div>`).join('');
+
+  // Revoked
+  document.getElementById('list-r').innerHTML = revoked.length === 0
+    ? '<div class="empty">None</div>'
+    : revoked.map(id => `
+      <div class="card">
+        <div class="card-info">
+          <div class="mid">${id}</div>
+          <span class="badge b-revoked">REVOKED</span>
+        </div>
+        <div class="actions">
+          <button class="btn-approve" onclick="reApprove('${id}')">↩ Re-approve</button>
+        </div>
+      </div>`).join('');
+}
+
+// ── Actions ───────────────────────────────────────────
+async function approveUser(mid) {
+  status(`Approving ${mid}…`, 'loading');
+  try {
+    mid = mid.toUpperCase();
+    if (!approved.includes(mid)) approved.push(mid);
+    revoked = revoked.filter(id => id !== mid);
+    pending = pending.filter(p => p.mid !== mid);
+    await ghPatch({
+      'approved_ids.txt':{ content: approved.join('\n') + '\n' },
+      'revoked_ids.txt' :{ content: revoked.join('\n')  || ' '  },
+      'pending_txns.txt':{ content: pending.map(p=>p.raw).join('\n') || ' ' }
+    });
+    await ntfy(mid, 'approve');
+    render();
+    status(`✓ Approved: ${mid}`, 'ok');
+  } catch(e) { status('Error: '+e.message, 'err'); }
+}
+
+async function denyPending(mid) {
+  if (!confirm(`Deny and remove pending request for ${mid}?`)) return;
+  status(`Denying ${mid}…`, 'loading');
+  try {
+    mid = mid.toUpperCase();
+    pending = pending.filter(p => p.mid !== mid);
+    await ghPatch({
+      'pending_txns.txt':{ content: pending.map(p=>p.raw).join('\n') || ' ' }
+    });
+    render();
+    status(`✓ Denied & removed: ${mid}`, 'ok');
+  } catch(e) { status('Error: '+e.message, 'err'); }
+}
+
+async function revokeUser(mid) {
+  status(`Revoking ${mid}…`, 'loading');
+  try {
+    mid = mid.toUpperCase();
+    approved = approved.filter(id => id !== mid);
+    if (!revoked.includes(mid)) revoked.push(mid);
+    await ghPatch({
+      'approved_ids.txt':{ content: approved.join('\n') || ' ' },
+      'revoked_ids.txt' :{ content: revoked.join('\n') }
+    });
+    await ntfy(mid, 'revoke');
+    render();
+    status(`✓ Revoked: ${mid}`, 'ok');
+  } catch(e) { status('Error: '+e.message, 'err'); }
+}
+
+async function reApprove(mid) {
+  mid = mid.toUpperCase();
+  revoked = revoked.filter(id => id !== mid);
+  if (!approved.includes(mid)) approved.push(mid);
+  try {
+    await ghPatch({
+      'approved_ids.txt':{ content: approved.join('\n') },
+      'revoked_ids.txt' :{ content: revoked.join('\n') || ' ' }
+    });
+    await ntfy(mid, 'approve');
+    render();
+    status(`✓ Re-approved: ${mid}`, 'ok');
+  } catch(e) { status('Error: '+e.message, 'err'); }
+}
+
+async function manualApprove() {
+  const mid = document.getElementById('manual-id').value.trim().toUpperCase();
+  if (!/^[A-F0-9]{8,16}$/i.test(mid)) {
+    status('Invalid Machine ID — must be 8-16 hex chars', 'err'); return;
+  }
+  document.getElementById('manual-id').value = '';
+  await approveUser(mid);
+}
+
+// ── ntfy push ─────────────────────────────────────────
+async function ntfy(mid, action) {
+  const topic  = `slcalc_${mid.substring(0,10).toLowerCase()}`;
+  const isAppr = action === 'approve';
+  try {
+    await fetch(`https://ntfy.sh/${topic}`, {
+      method:'POST',
+      headers:{
+        Title   : isAppr ? `APPROVED:${mid}` : `REVOKE:${mid}`,
+        Priority: isAppr ? 'high' : 'urgent',
+        'Content-Type':'text/plain'
+      },
+      body: isAppr
+        ? `StopLoss license APPROVED. Machine: ${mid}`
+        : `StopLoss license REVOKED. Machine: ${mid}`
+    });
+  } catch(_) { /* ntfy failure is non-critical */ }
+}
+
+// ── Utils ─────────────────────────────────────────────
+function set(id, val) { document.getElementById(id).textContent = val; }
+function status(msg, cls) {
+  const el = document.getElementById('status-bar');
+  el.textContent = msg;
+  el.className = cls ? `status-bar ${cls}` : 'status-bar';
+  el.id = 'status-bar';
+}
+
+</script>
+</body>
+</html>
