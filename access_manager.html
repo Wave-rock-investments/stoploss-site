@@ -78,7 +78,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .stat.rv{border-color:#2a2000}
 
 /* Two-column layout */
-.layout{display:grid;grid-template-columns:1fr 310px;gap:18px;align-items:start}
+.layout{display:grid;grid-template-columns:1fr 310px;gap:10px;align-items:start}
 @media(max-width:1100px){.layout{grid-template-columns:1fr}}
 .sidebar-col{display:flex;flex-direction:column;gap:14px;position:sticky;top:70px}
 
@@ -113,7 +113,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 /* ── TAGS ── */
 .tag{display:inline-block;padding:1px 6px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.3px}
 .tag.new{background:var(--blue-bg);color:var(--blue);border:1px solid #0d3a54}
-.tag.appr{background:var(--green-bg);color:var(--green);border:1px solid #1b5e20}
+.tag.aprr{background:var(--green-bg);color:var(--green);border:1px solid #1b5e20}
 .tag.rev{background:var(--red-bg);color:var(--red);border:1px solid #4a1212}
 .tag.p1{background:#1a1200;color:#ffb300;border:1px solid #3d2c00;font-size:9px}
 .tag.p2{background:#0d1a2e;color:#4fc3f7;border:1px solid #0d3a54;font-size:9px}
@@ -340,7 +340,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <div class="toast" id="toast"></div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
+// \u2500\u2500 CONFIG \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 const GIST_ID     = "8a8b52dc14c0ecca38121df01557ec99";
 const NTFY_TOPIC  = "stoploss_dev_h7zltndg";
 const NTFY_HB     = "stoploss_hb_h7zltndg";
@@ -349,7 +349,7 @@ const BASE_RAW    = `https://gist.githubusercontent.com/${GIST_OWNER}/${GIST_ID}
 const APPROVE_URL = "https://warm-profiterole-4c0d37.netlify.app/.netlify/functions/approve";
 const PRICE_USDT  = 250;
 
-// ── STATE ───────────────────────────────────────────────────────────────────
+// \u2500\u2500 STATE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 let approvedIds   = [];
 let usedTxns      = [];
 let ntfyUsers     = [];
@@ -366,7 +366,7 @@ let hbLastSeen    = {};
 let modalCallback = null;
 let searchTimeout = null;
 
-// ── PIN LOCK ─────────────────────────────────────────────────────────────────
+// \u2500\u2500 PIN LOCK \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function pinHash(p){ let h=0; for(let i=0;i<p.length;i++) h=(Math.imul(31,h)+p.charCodeAt(i))|0; return String(h); }
 function tryUnlock(){
   const pin = document.getElementById('pin-input').value;
@@ -408,27 +408,27 @@ function doChangePIN(){
   if(nw !== conf){ errEl.textContent='PINs do not match.'; return; }
   localStorage.setItem('adminPinHash', pinHash(nw));
   hideChangePIN();
-  toast('✓ PIN changed successfully', 'info');
+  toast('\u2713 PIN changed successfully', 'info');
 }
 if(sessionStorage.getItem('adminUnlocked')==='1'){
   document.getElementById('lockscreen').style.display='none';
   document.getElementById('app').style.display='block';
 }
 
-// ── UTILITIES ────────────────────────────────────────────────────────────────
+// \u2500\u2500 UTILITIES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function fetchT(url, opts={}, ms=10000){
   return Promise.race([fetch(url,opts), new Promise((_,r)=>setTimeout(()=>r(new Error('Timeout')),ms))]);
 }
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 function isValidMachineId(id){ return /^[A-F0-9]{16}$/i.test(id); }
 function sanMid(id){ return (id||'').trim().toUpperCase().replace(/[^A-F0-9]/g,''); }
-function fmtTs(t){ return t ? new Date(t*1000).toLocaleString() : '—'; }
+function fmtTs(t){ return t ? new Date(t*1000).toLocaleString() : '\u2014'; }
 function show(id){ document.getElementById(id).style.display='inline-block'; }
 function hide(id){ document.getElementById(id).style.display='none'; }
 function setLoading(on){ document.querySelectorAll('.btn').forEach(b=>b.disabled=on); }
 function copyText(t){ navigator.clipboard.writeText(t).then(()=>toast('Copied!')); }
 
-// ── TOAST ────────────────────────────────────────────────────────────────────
+// \u2500\u2500 TOAST \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function toast(msg,type){
   const el=document.getElementById('toast');
   el.textContent=msg;
@@ -437,7 +437,7 @@ function toast(msg,type){
   el._t=setTimeout(()=>el.className='toast',3000);
 }
 
-// ── MODAL ────────────────────────────────────────────────────────────────────
+// \u2500\u2500 MODAL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function showModal(title,msg,cb){
   document.getElementById('modal-title').textContent=title;
   document.getElementById('modal-message').textContent=msg;
@@ -447,7 +447,7 @@ function showModal(title,msg,cb){
 function modalCancel(){ document.getElementById('modal').classList.remove('show'); modalCallback=null; }
 function modalConfirm(){ document.getElementById('modal').classList.remove('show'); if(modalCallback)modalCallback(); modalCallback=null; }
 
-// ── DATA LOADING ─────────────────────────────────────────────────────────────
+// \u2500\u2500 DATA LOADING \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 async function loadGist(){
   show('spin-gist');
   try {
@@ -480,15 +480,15 @@ async function loadPendingGist(){
         if(!p.mid || !isValidMachineId(p.mid)) return;
         const mid=p.mid.toUpperCase();
         const source = p.p1 ? 'P1' : (p.tx && p.tx!=='P1-DIRECT') ? 'P2' : 'P1';
-        if(!vtfyUsers.find(u=>u.mid===mid)){
+        if(!ntfyUsers.find(u=>u.mid===mid)){
           const u={
             mid, user:p.user||'', host:p.host||'', mac:p.mac||'',
             model:p.model||'', cpu:p.cpu||'', ram:p.ram||'',
             screen:p.screen||'', arch:p.arch||'',
-            os:(p.os||'').split('-')[0].trim()||'—',
+            os:(p.os||'').split('-')[0].trim()||'\u2014',
             ip:p.ip||'', loc:[p.city,p.region,p.country].filter(Boolean).join(', '),
             org:p.org||'', coords:p.loc||'', coords_src:p.loc_src||'IP',
-            time:p.ts ? fmtTs(p.ts) : '—', tx:p.tx||'', source
+            time:p.ts ? fmtTs(p.ts) : '\u2014', tx:p.tx||'', source
           };
           ntfyUsers.push(u);
           userDataCache[mid]=u;
@@ -526,12 +526,12 @@ async function loadNtfy(){
           mac:g(/MAC:\s+([^\n]+)/), model:g(/Model:\s+([^\n]+)/),
           cpu:g(/CPU:\s+([^\n]+)/), ram:g(/RAM:\s+([^\n]+)/),
           screen:g(/Screen:\s+([^\n]+)/), arch:g(/Arch:\s+([^\n]+)/),
-          os:(g(/OS:\s+([^\n]+)/)||'').split('-')[0].trim()||'—',
-          ip:g(/IP:\s+(\S+)/), loc:g(/IP:[^\n]+—\s+([^\n]+)/),
+          os:(g(/OS:\s+([^\n]+)/)||'').split('-')[0].trim()||'\u2014',
+          ip:g(/IP:\s+(\S+)/), loc:g(/IP:[^\n]+\u2014\s+([^\n]+)/),
           org:g(/Org:\s+([^\n]+)/),
           coords:g(/Coords:\s+([\d.,\-\s]+)/),
           coords_src:g(/Coords:[^\n]+\(([^)]+)\)/),
-          time:msg.time?fmtTs(msg.time):'—',
+          time:msg.time?fmtTs(msg.time):'\u2014',
           tx:g(/TX:\s+(\S+)/)||'',
           source:isP2?'P2':'P1'
         });
@@ -575,7 +575,7 @@ async function loadHeartbeats(){
   await fp('https://ntfy.sh/'+NTFY_TOPIC+'/json?poll=1&since='+since);
 }
 
-// ── RENDERING ────────────────────────────────────────────────────────────────
+// \u2500\u2500 RENDERING \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function initials(s){ return (s||'?').replace(/[^a-zA-Z0-9]/g,' ').trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'??'; }
 
 function srcBadge(u){
@@ -585,8 +585,8 @@ function srcBadge(u){
 
 function txLink(tx){
   if(!tx||tx==='P1-DIRECT'||tx.length<20) return '';
-  const clean=tx.replace(/…/g,'').trim().substring(0,64);
-  return '<a href="https://tronscan.org/#/transaction/'+encodeURIComponent(clean)+'" target="_blank" class="tronscan-link" onclick="event.stopPropagation()">TronScan ↗</a>';
+  const clean=tx.replace(/\u2026/g,'').trim().substring(0,64);
+  return '<a href="https://tronscan.org/#/transaction/'+encodeURIComponent(clean)+'" target="_blank" class="tronscan-link" onclick="event.stopPropagation()">TronScan \u2197</a>';
 }
 
 function buildDetail(u){
@@ -597,15 +597,15 @@ function buildDetail(u){
     ['Arch',u.arch||''],['OS',u.os||''],['IP',u.ip||''],
     ['Location',u.loc||''],['Org/ISP',u.org||''],
     ['Activated',u.time||''],['Host',u.host||''],
-    ['Source',u.source||'—'],
+    ['Source',u.source||'\u2014'],
   ];
-  if(u.tx && u.tx!=='P1-DIRECT') rows.push(['TX',u.tx.substring(0,32)+'…']);
+  if(u.tx && u.tx!=='P1-DIRECT') rows.push(['TX',u.tx.substring(0,32)+'\u2026']);
   let tbl='<table>';
   rows.forEach(r=>{ if(r[1]) tbl+='<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td></tr>'; });
   tbl+='</table>';
   const txL = u.tx&&u.tx!=='P1-DIRECT'&&u.tx.length>20 ? '<div style="margin-top:8px">'+txLink(u.tx)+'</div>' : '';
   const note=customerNotes[u.mid]||'';
-  const noteSec='<div class="note-section"><div class="note-label">Note</div><textarea class="note-input" id="note-'+esc(u.mid)+'" placeholder="Add a note about this customer…" oninput="saveNote(\''+esc(u.mid)+'\')">'+esc(note)+'</textarea></div>';
+  const noteSec='<div class="note-section"><div class="note-label">Note</div><textarea class="note-input" id="note-'+esc(u.mid)+'" placeholder="Add a note about this customer\u2026" oninput="saveNote(\''+esc(u.mid)+'\')">'+esc(note)+'</textarea></div>';
   let mapHtml='';
   if(u.coords){
     const src=u.coords_src==='GPS'?'<span class="gps-badge">GPS</span>':'<span class="ip-badge">IP</span>';
@@ -616,7 +616,7 @@ function buildDetail(u){
   if(mt5&&mt5.login){
     const pc=mt5.profit>=0?'#4caf50':'#ef5350';
     const posRows=mt5.positions.map(p=>'<tr><td style="color:#aaa">'+esc(p.symbol)+'</td><td style="color:'+(p.type==='BUY'?'#4fc3f7':'#ef5350')+'">'+esc(p.type)+'</td><td style="color:#aaa">'+p.volume+'</td><td>'+p.open.toFixed(5)+'</td><td>'+p.current.toFixed(5)+'</td><td style="color:'+(p.profit>=0?'#4caf50':'#ef5350')+';font-weight:600">'+(p.profit>=0?'+':'')+p.profit.toFixed(2)+'</td></tr>').join('');
-    mt5Html='<div style="margin-top:12px;border-top:1px solid #1a2e1a;padding-top:10px"><div style="font-size:10px;color:#4caf50;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">● Live MT5 — '+esc(mt5.server)+' #'+esc(mt5.login)+'</div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">'
+    mt5Html='<div style="margin-top:12px;border-top:1px solid #1a2e1a;padding-top:10px"><div style="font-size:10px;color:#4caf50;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">\u25cf Live MT5 \u2014 '+esc(mt5.server)+' #'+esc(mt5.login)+'</div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">'
       +[['Balance',mt5.balance],['Equity',mt5.equity],['Float P/L',mt5.profit]].map(([lbl,val],i)=>'<div style="background:#0d1f0d;border:1px solid #1e3a1e;border-radius:8px;padding:7px 12px"><div style="font-size:9px;color:#555;text-transform:uppercase">'+lbl+'</div><div style="font-size:14px;font-weight:700;color:'+(i===2?pc:'#eee')+'">'+(i===2&&val>=0?'+':'')+val.toFixed(2)+' <span style="font-size:9px;color:#555">'+esc(mt5.currency)+'</span></div></div>').join('')
       +'</div>'+(mt5.positions.length?'<table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="color:#333;font-size:10px;text-transform:uppercase"><th style="text-align:left;padding:3px 4px">Symbol</th><th>Side</th><th>Vol</th><th>Open</th><th>Cur</th><th>P/L</th></tr></thead><tbody>'+posRows+'</tbody></table>':'<div style="color:#333;font-size:11px">No open positions</div>')+'</div>';
   }
@@ -641,7 +641,7 @@ function buildCard(id, ctx){
   const hasNote = !!customerNotes[id];
 
   const statusTag = isRev  ? '<span class="tag rev">REVOKED</span>'
-                  : isApp  ? '<span class="tag appr">APPHOVED</span>'
+                  : isApp  ? '<span class="tag appr">APPROVED</span>'
                   : isDis  ? '<span class="tag" style="background:#111;color:#333;border:1px solid #1a1a1e">DISMISSED</span>'
                   : '<span class="tag new">PENDING</span>';
   const onlineDot = (isApp&&isOnline) ? '<span class="online-dot" title="Online"></span>' : '';
@@ -656,15 +656,15 @@ function buildCard(id, ctx){
     : isApp
       ? '<button class="btn btn-revoke btn-sm" data-id="'+esc(id)+'" onclick="event.stopPropagation();revokeUser(this.dataset.id)">Revoke</button>'
     : '<button class="btn btn-approve btn-sm" data-id="'+esc(id)+'" onclick="event.stopPropagation();approveUser(this.dataset.id)">Approve</button>'
-      +(isDis?'':'<button class="btn btn-dismiss btn-sm" data-id="'+esc(id)+'" onclick="event.stopPropagation();dismissUser(this.dataset.id)" title="Dismiss">✕</button>');
+      +(isDis?'':'<button class="btn btn-dismiss btn-sm" data-id="'+esc(id)+'" onclick="event.stopPropagation();dismissUser(this.dataset.id)" title="Dismiss">\u2715</button>');
 
   return '<div class="ucard">'
     +'<div class="ucard-top" onclick="toggle(\''+esc(key)+'\')">'
       +'<div class="avatar" style="background:'+abg+';color:'+acl+'">'+(u?initials(u.user):id.substring(0,2))+'</div>'
       +'<div class="ucard-main">'
         +'<div class="ucard-name">'+(u?esc(u.user||'Unknown'):'Unknown')+' '+statusTag+' '+srcBadge(u)+onlineDot+tradeBadge+noteDot+'</div>'
-        +'<div class="ucard-meta">'+(u?[u.ip,u.loc,u.host,u.model].filter(Boolean).map(esc).join(' · '):'No install data')+'</div>'
-        +'<div class="ucard-mid">'+i++' <button class="copy-btn" onclick="event.stopPropagation();copyText(\''+esc(id)+'\')" title="Copy ID">⧉</button>'
+        +'<div class="ucard-meta">'+(u?[u.ip,u.loc,u.host,u.model].filter(Boolean).map(esc).join(' \u00b7 '):'No install data')+'</div>'
+        +'<div class="ucard-mid">'+id+' <button class="copy-btn" onclick="event.stopPropagation();copyText(\''+esc(id)+'\')" title="Copy ID">\u29c9</button>'
           +(u&&u.tx&&u.tx!=='P1-DIRECT'?txLink(u.tx):'')
         +'</div>'
       +'</div>'
@@ -729,11 +729,11 @@ function renderAll(){
   } else {
     revDiv.innerHTML='<div style="padding:14px 16px">'
       +'<div style="font-size:26px;font-weight:700;color:var(--gold);margin-bottom:3px">$'+(usedTxns.length*PRICE_USDT).toLocaleString()+' USDT</div>'
-      +'<div style="font-size:11px;color:#555;margin-bottom:12px">'+usedTxns.length+' payment'+(usedTxns.length!==1?'s':'')+' × $'+PRICE_USDT+'</div>'
+      +'<div style="font-size:11px;color:#555;margin-bottom:12px">'+usedTxns.length+' payment'+(usedTxns.length!==1?'s':'')+' \u00d7 $'+PRICE_USDT+'</div>'
       +'<div style="display:flex;flex-direction:column;gap:4px">'
       +usedTxns.map((tx,i)=>'<div style="font-size:10px;font-family:monospace;color:#333;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 0;border-bottom:1px solid #0e0e0e">'
         +'<span style="color:#3a3a40;flex-shrink:0">#'+(i+1)+'</span>'
-        +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#555">'+tx.substring(0,28)+'…</span>'
+        +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#555">'+tx.substring(0,28)+'\u2026</span>'
         +txLink(tx)
         +'</div>').join('')
       +'</div></div>';
@@ -745,12 +745,12 @@ function renderAll(){
     actDiv.innerHTML='<div class="empty">No activity yet.</div>';
   } else {
     actDiv.innerHTML=activityLog.slice(0,30).map(ev=>{
-      let icon='📋',color='#333',label=ev.title||'Event';
-      if(label.includes('Auto-Approved')||label.includes('AUTO-APPROVED')){icon='✅';color='#4caf50';}
-      else if(label.includes('APPROVED')||label.includes('Approved')){icon='✓';color='#4caf50';}
-      else if(label.includes('P1')||label.includes('Request')){icon='⏳';color='#ff8a65';}
-      else if(label.includes('Revoke')||label.includes('revoke')){icon='🚫';color='#ef5350';}
-      else if(label.includes('Manual')){icon='✏️';color='#4fc3f7';}
+      let icon='\u1f4cb',color='#333',label=ev.title||'Event';
+      if(label.includes('Auto-Approved')||label.includes('AUTO-APPROVED')){icon='\u2705';color='#4caf50';}
+      else if(label.includes('APPROVED')||label.includes('Approved')){icon='\u2713';color='#4caf50';}
+      else if(label.includes('P1')||label.includes('Request')){icon='\u23f3';color='#ff8a65';}
+      else if(label.includes('Revoke')||label.includes('revoke')){icon='\u1f6ab';color='#ef5350';}
+      else if(label.includes('Manual')){icon='\u270f\ufe0f';color='#4fc3f7';}
       const t=ev.time?new Date(ev.time*1000):{};
       const ts=ev.time?(t.toLocaleDateString()+' '+t.toLocaleTimeString()):'';
       return '<div class="activity-item">'
@@ -764,7 +764,7 @@ function renderAll(){
   }
 }
 
-// ── ACTIONS ──────────────────────────────────────────────────────────────────
+// \u2500\u2500 ACTIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 async function callApprove(action, mid){
   const r=await fetchT(APPROVE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,machineId:mid})},15000);
   if(!r.ok){ let e='HTTP '+r.status; try{const d=await r.json();e=d.error||e;}catch(_){} throw new Error(e); }
@@ -783,7 +783,7 @@ async function approveUser(mid){
     if(!approvedIds.includes(mid)) approvedIds.push(mid);
     renderAll();
     await callApprove('approve',mid);
-    toast('✓ Approved: '+mid.substring(0,8)+'…');
+    toast('\u2713 Approved: '+mid.substring(0,8)+'\u2026');
   } catch(e){ approvedIds=approvedIds.filter(x=>x!==mid); toast('Approve failed: '+e.message,'err'); renderAll(); }
   finally{ setLoading(false); }
 }
@@ -793,7 +793,7 @@ async function approveAllPending(){
   if(!p.length){toast('No pending requests','info');return;}
   showModal('Approve '+p.length+' pending?','Approve all pending requests at once?',async()=>{
     for(const u of p) await approveUser(u.mid);
-    toast('✓ Approved '+p.length+' user'+(p.length!==1?'s':''));
+    toast('\u2713 Approved '+p.length+' user'+(p.length!==1?'s':''));
   });
 }
 
@@ -813,7 +813,7 @@ async function revokeUser(mid){
       localStorage.setItem('revokedIds',JSON.stringify(revokedIds));
       renderAll();
       await callApprove('revoke',mid);
-      toast('Revoked: '+mid.substring(0,8)+'…','info');
+      toast('Revoked: '+mid.substring(0,8)+'\u2026','info');
     } catch(e){ if(!approvedIds.includes(mid)) approvedIds.push(mid); revokedIds=revokedIds.filter(x=>x!==mid); localStorage.setItem('revokedIds',JSON.stringify(revokedIds)); toast('Revoke failed: '+e.message,'err'); renderAll(); }
     finally{ setLoading(false); }
   });
@@ -829,14 +829,14 @@ async function reApproveUser(mid){
       if(!approvedIds.includes(mid)) approvedIds.push(mid);
       renderAll();
       await callApprove('approve',mid);
-      toast('✓ Re-approved: '+mid.substring(0,8)+'…');
+      toast('\u2713 Re-approved: '+mid.substring(0,8)+'\u2026');
     } catch(e){ approvedIds=approvedIds.filter(x=>x!==mid); if(!revokedIds.includes(mid)) revokedIds.push(mid); localStorage.setItem('revokedIds',JSON.stringify(revokedIds)); toast('Re-approve failed: '+e.message,'err'); renderAll(); }
     finally{ setLoading(false); }
   });
 }
 
 function deleteRevokedUser(mid){
-  showModal('Remove from revoked list?','Removes from dashboard only — access stays blocked.',()=>{
+  showModal('Remove from revoked list?','Removes from dashboard only \u2014 access stays blocked.',()=>{
     revokedIds=revokedIds.filter(x=>x!==mid);
     localStorage.setItem('revokedIds',JSON.stringify(revokedIds));
     delete userDataCache[mid];
@@ -859,12 +859,12 @@ async function addManual(){
     input.value=''; noteInput.value='';
     renderAll();
     await callApprove('approve',id);
-    toast('✓ Approved: '+id.substring(0,8)+'…');
+    toast('\u2713 Approved: '+id.substring(0,8)+'\u2026');
   } catch(e){ approvedIds=approvedIds.filter(x=>x!==id); input.value=id; toast('Approve failed: '+e.message,'err'); renderAll(); }
   finally{ setLoading(false); }
 }
 
-// ── EXPORT CSV ───────────────────────────────────────────────────────────────
+// \u2500\u2500 EXPORT CSV \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function exportCSV(){
   const rows=[['Machine ID','Status','User','Host','Model','IP','Location','Source','TX Hash','Note','Activated']];
   const seen=new Set(), all=[];
@@ -881,10 +881,10 @@ function exportCSV(){
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download='stoploss_customers_'+new Date().toISOString().split('T')[0]+'.csv';
   a.click();
-  toast('✓ CSV exported');
+  toast('\u2713 CSV exported');
 }
 
-// ── REAL-TIME SSE ─────────────────────────────────────────────────────────────
+// \u2500\u2500 REAL-TIME SSE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 let sseRetry={};
 function _sseConnect(url,onMsg,topic){
   const src=new EventSource(url);
@@ -902,7 +902,7 @@ function startSSE(){
     activityLog.unshift({time:msg.time,title:msg.title||'Event',body});
     if(!ntfyUsers.find(x=>x.mid===midu)){
       const isP2=(msg.title||'').includes('Auto-Approved')||body.includes('[AUTO-APPROVED');
-      ntfyUsers.push({mid:midu,user:g(/User:\s+([^\n]+)/),host:g(/Host:\s+([^\n]+)/),mac:g(/MAC:\s+([^\n]+)/),model:g(/Model:\s+([^\n]+)/),cpu:g(/CPU:\s+([^\n]+)/),ram:g(/RAM:\s+([^\n]+)/),screen:g(/Screen:\s+([^\n]+)/),arch:g(/Arch:\s+([^\n]+)/),os:(g(/OS:\s+([^\n]+)/)||'').split('-')[0].trim()||'—',ip:g(/IP:\s+(\S+)/),loc:g(/IP:[^\n]+—\s+([^\n]+)/),org:g(/Org:\s+([^\n]+)/),coords:g(/Coords:\s+([\d.,\-\s]+)/),coords_src:g(/Coords:[^\n]+\(([^)]+)\)/),time:msg.time?fmtTs(msg.time):'—',tx:g(/TX:\s+(\S+)/)||'',source:isP2?'P2':'P1'});
+      ntfyUsers.push({mid:midu,user:g(/User:\s+([^\n]+)/),host:g(/Host:\s+([^\n]+)/),mac:g(/MAC:\s+([^\n]+)/),model:g(/Model:\s+([^\n]+)/),cpu:g(/CPU:\s+([^\n]+)/),ram:g(/RAM:\s+([^\n]+)/),screen:g(/Screen:\s+([^\n]+)/),arch:g(/Arch:\s+([^\n]+)/),os:(g(/OS:\s+([^\n]+)/)||'').split('-')[0].trim()||'\u2014',ip:g(/IP:\s+(\S+)/),loc:g(/IP:[^\n]+\u2014\s+([^\n]+)/),org:g(/Org:\s+([^\n]+)/),coords:g(/Coords:\s+([\d.,\-\s]+)/),coords_src:g(/Coords:[^\n]+\(([^)]+)\)/),time:msg.time?fmtTs(msg.time):'\u2014',tx:g(/TX:\s+(\S+)/)||'',source:isP2?'P2':'P1'});
       userDataCache[midu]=ntfyUsers[ntfyUsers.length-1];
       localStorage.setItem('userDataCache',JSON.stringify(userDataCache));
       toast('New install: '+(g(/User:\s+([^\n]+)/)||midu),'info');
@@ -918,19 +918,19 @@ setInterval(()=>{
   if(ch) renderAll();
 }, 60000);
 
-// ── REFRESH & COUNTDOWN ───────────────────────────────────────────────────────
+// \u2500\u2500 REFRESH & COUNTDOWN \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 async function refreshAll(){
-  document.getElementById('updated-at').textContent='Loading…';
+  document.getElementById('updated-at').textContent='Loading\u2026';
   await Promise.all([loadGist(),loadNtfy(),loadHeartbeats(),loadPendingGist(),loadUsedTxns()]);
   renderAll();
   document.getElementById('updated-at').textContent='Updated '+new Date().toLocaleTimeString();
   _cd=30;
 }
 let _cd=30;
-setInterval(()=>{ if(_cd>0)_cd--; const el=document.getElementById('countdown'); if(el) el.textContent=_cd>0?_cd+'s':'…'; },1000);
+setInterval(()=>{ if(_cd>0)_cd--; const el=document.getElementById('countdown'); if(el) el.textContent=_cd>0?_cd+'s':'\u2026'; },1000);
 setInterval(refreshAll,30000);
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// \u2500\u2500 INIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 async function init(){
   revokedIds=revokedIds.filter(isValidMachineId);
   localStorage.setItem('revokedIds',JSON.stringify(revokedIds));
