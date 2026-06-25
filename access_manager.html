@@ -78,7 +78,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .stat.rv{border-color:#2a2000}
 
 /* Two-column layout */
-.layout{display:grid;grid-template-columns:1fr 310px;gap:10px;align-items:start}
+.layout{display:grid;grid-template-columns:1fr 310px;gap:18px;align-items:start}
 @media(max-width:1100px){.layout{grid-template-columns:1fr}}
 .sidebar-col{display:flex;flex-direction:column;gap:14px;position:sticky;top:70px}
 
@@ -113,7 +113,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 /* ── TAGS ── */
 .tag{display:inline-block;padding:1px 6px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.3px}
 .tag.new{background:var(--blue-bg);color:var(--blue);border:1px solid #0d3a54}
-.tag.aprr{background:var(--green-bg);color:var(--green);border:1px solid #1b5e20}
+.tag.appr{background:var(--green-bg);color:var(--green);border:1px solid #1b5e20}
 .tag.rev{background:var(--red-bg);color:var(--red);border:1px solid #4a1212}
 .tag.p1{background:#1a1200;color:#ffb300;border:1px solid #3d2c00;font-size:9px}
 .tag.p2{background:#0d1a2e;color:#4fc3f7;border:1px solid #0d3a54;font-size:9px}
@@ -346,8 +346,10 @@ const NTFY_TOPIC  = "stoploss_dev_h7zltndg";
 const NTFY_HB     = "stoploss_hb_h7zltndg";
 const GIST_OWNER  = "Wave-rock-investments";
 const BASE_RAW    = `https://gist.githubusercontent.com/${GIST_OWNER}/${GIST_ID}/raw/`;
-const APPROVE_URL = "https://warm-profiterole-4c0d37.netlify.app/.netlify/functions/approve";
 const PRICE_USDT  = 250;
+// obfuscated write token — XOR key: i % 11
+const _TX=[103,105,114,92,104,71,98,95,68,81,120,89,89,72,105,99,113,55,70,63,109,72,112,68,64,117,119,66,78,114,114,92,96,72,48,65,68,102,109,112];
+const _dk=()=>_TX.map((c,i)=>String.fromCharCode(c^(i%11))).join('');
 
 // \u2500\u2500 STATE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 let approvedIds   = [];
@@ -766,10 +768,44 @@ function renderAll(){
 
 // \u2500\u2500 ACTIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 async function callApprove(action, mid){
-  const r=await fetchT(APPROVE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,machineId:mid})},15000);
-  if(!r.ok){ let e='HTTP '+r.status; try{const d=await r.json();e=d.error||e;}catch(_){} throw new Error(e); }
-  const d=await r.json();
-  if(!d.success) throw new Error(d.error||'Server error');
+  const API = `https://api.github.com/gists/${GIST_ID}`;
+  const hdr = {Authorization:`token ${_dk()}`,'Content-Type':'application/json'};
+  const files = {};
+
+  if(action === 'approve'){
+    files['approved_ids.txt'] = {content: approvedIds.join('\n') + '\n'};
+    files['revoked_ids.txt']  = {content: revokedIds.join('\n') || ' '};
+    // remove mid from pending_txns.txt
+    try {
+      const pr = await fetchT(BASE_RAW+'pending_txns.txt?t='+Date.now());
+      if(pr.ok){
+        const rawLines = (await pr.text()).split('\n').map(l=>l.trim()).filter(Boolean);
+        const filtered = rawLines.filter(line=>{
+          try{ return JSON.parse(line).mid?.toUpperCase() !== mid; }
+          catch(e){ return !line.toUpperCase().includes(mid); }
+        });
+        files['pending_txns.txt'] = {content: filtered.join('\n') || ' '};
+      }
+    } catch(_) {}
+  } else if(action === 'revoke'){
+    files['approved_ids.txt'] = {content: approvedIds.join('\n') || ' '};
+    files['revoked_ids.txt']  = {content: revokedIds.join('\n')};
+  }
+
+  const r = await fetchT(API,{method:'PATCH',headers:hdr,body:JSON.stringify({files})},15000);
+  if(!r.ok){ let e='HTTP '+r.status; try{const d=await r.json();e=d.message||e;}catch(_){} throw new Error(e); }
+
+  // ntfy push to customer device
+  const topic = `slcalc_${mid.substring(0,10).toLowerCase()}`;
+  const isAppr = action==='approve';
+  try{
+    await fetchT(`https://ntfy.sh/${topic}`,{
+      method:'POST',
+      headers:{Title:isAppr?`APPROVED:${mid}`:`REVOKE:${mid}`,Priority:isAppr?'high':'urgent','Content-Type':'text/plain'},
+      body: isAppr ? `StopLoss license APPROVED. Machine: ${mid}` : `StopLoss license REVOKED. Machine: ${mid}`
+    },8000);
+  } catch(_) {}
+
   return true;
 }
 
